@@ -79,5 +79,41 @@
     "forecasted_demand": 96,
     "trend": "stable",
     "period": "Next 30 days"
+  },
+  {
+    "id": "10",
+    "item_sku": "SRV-301",
+    "item_name": "Micro Servo Motor",
+    "current_demand": 80,
+    "forecasted_demand": 130,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "11",
+    "item_sku": "TMP-201",
+    "item_name": "Temperature Sensor Module",
+    "current_demand": 210,
+    "forecasted_demand": 310,
+    "trend": "increasing",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "12",
+    "item_sku": "SRV-302",
+    "item_name": "Standard Servo Motor",
+    "current_demand": 40,
+    "forecasted_demand": 41,
+    "trend": "stable",
+    "period": "Next 30 days"
+  },
+  {
+    "id": "13",
+    "item_sku": "PSU-508",
+    "item_name": "Battery Backup Power Supply",
+    "current_demand": 120,
+    "forecasted_demand": 85,
+    "trend": "decreasing",
+    "period": "Next 30 days"
   }
 ]

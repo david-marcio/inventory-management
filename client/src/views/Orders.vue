@@ -74,6 +74,65 @@
           </table>
         </div>
       </div>
+
+      <!-- Section divider -->
+      <div class="section-divider">
+        <span class="section-divider-label">Restocking Orders</span>
+      </div>
+
+      <!-- Submitted restocking orders -->
+      <div v-if="restockingLoading" class="loading">Loading restocking orders...</div>
+      <div v-else-if="restockingError" class="error">{{ restockingError }}</div>
+      <div v-else class="card restocking-orders-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            Submitted Orders
+            <span class="count-badge">{{ restockingOrders.length }}</span>
+          </h3>
+          <span class="restocking-label">Internal Procurement</span>
+        </div>
+
+        <div v-if="restockingOrders.length === 0" class="empty-state">
+          No restocking orders submitted yet. Use the Restocking tab to place an order.
+        </div>
+
+        <div v-else class="table-container">
+          <table class="restocking-orders-table">
+            <thead>
+              <tr>
+                <th>Order Number</th>
+                <th>Items</th>
+                <th>Total Value</th>
+                <th>Budget</th>
+                <th>Submitted</th>
+                <th>Expected Delivery</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in restockingOrders" :key="order.id">
+                <td><strong>{{ order.order_number }}</strong></td>
+                <td>
+                  <details class="items-details">
+                    <summary class="items-summary">{{ order.items.length }} item{{ order.items.length !== 1 ? 's' : '' }}</summary>
+                    <div class="items-dropdown">
+                      <div v-for="(item, idx) in order.items" :key="idx" class="item-entry">
+                        <span class="item-name">{{ item.name }}</span>
+                        <span class="item-meta">SKU: {{ item.sku }} | Qty: {{ item.quantity }} @ ${{ item.unit_cost }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td><strong>${{ order.total_value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</strong></td>
+                <td>${{ order.budget.toLocaleString() }}</td>
+                <td>{{ formatDate(order.submitted_date) }}</td>
+                <td>{{ formatDate(order.expected_delivery) }}</td>
+                <td><span class="badge info">{{ order.status }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -95,6 +154,10 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+
+    const restockingOrders = ref([])
+    const restockingLoading = ref(false)
+    const restockingError = ref(null)
 
     // Use shared filters
     const {
@@ -153,7 +216,22 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    const loadRestockingOrders = async () => {
+      try {
+        restockingLoading.value = true
+        restockingError.value = null
+        restockingOrders.value = await api.getRestockingOrders()
+      } catch (err) {
+        restockingError.value = 'Failed to load restocking orders'
+      } finally {
+        restockingLoading.value = false
+      }
+    }
+
+    onMounted(() => {
+      loadOrders()
+      loadRestockingOrders()
+    })
 
     return {
       t,
@@ -165,7 +243,10 @@ export default {
       formatDate,
       currencySymbol,
       translateProductName,
-      translateCustomerName
+      translateCustomerName,
+      restockingOrders,
+      restockingLoading,
+      restockingError
     }
   }
 }
@@ -275,5 +356,66 @@ export default {
 .item-meta {
   font-size: 0.813rem;
   color: #64748b;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0 1rem;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.section-divider-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.restocking-orders-card {
+  border-left: 3px solid #7c3aed;
+}
+
+.restocking-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.count-badge {
+  display: inline-block;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
+  margin-left: 0.375rem;
+  vertical-align: middle;
+}
+
+.empty-state {
+  padding: 2.5rem;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.938rem;
+}
+
+.restocking-orders-table {
+  table-layout: auto;
+  width: 100%;
 }
 </style>
